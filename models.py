@@ -1,33 +1,19 @@
 import datetime
 
-from flask import Markup
-from markdown import markdown
-from micawber import parse_html
+from flask_peewee.auth import BaseUser
 from peewee import *
 
-from app import db, oembed
+from app import db
 
 
-class Note(Model):
-    content = TextField(verbose_name='Content')
-    timestamp = DateTimeField(default=datetime.datetime.now)
-    archived = BooleanField(default=False)
+class User(db.Model, BaseUser):
+    username = CharField()
+    password = CharField()
+    email = CharField()
+    join_date = DateTimeField(default=datetime.datetime.now)
+    active = BooleanField(default=True)
+    admin = BooleanField(default=False)
 
-    class Meta:
-        database = db
-
-    def html(self):
-        html = parse_html(
-            markdown(self.content),
-            oembed,
-            maxwidth=300,
-            urlize_all=True)
-        return Markup(html)
-
-    @classmethod
-    def public(cls):
-        return (Note
-                .select()
-                .where(Note.archived == False)
-                .order_by(Note.timestamp.desc()))
+    def __unicode__(self):
+        return self.username
 
