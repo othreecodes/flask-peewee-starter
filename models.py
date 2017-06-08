@@ -1,4 +1,5 @@
 import datetime
+from hashlib import md5
 
 from flask_peewee.auth import BaseUser
 from peewee import *
@@ -17,3 +18,9 @@ class User(db.Model, BaseUser):
     def __unicode__(self):
         return self.username
 
+    def __str__(self):
+        return self.username
+
+    def gravatar_url(self, size=80):
+        return 'http://www.gravatar.com/avatar/%s?d=identicon&s=%d' % \
+               (md5(self.email.strip().lower().encode('utf-8')).hexdigest(), size)
